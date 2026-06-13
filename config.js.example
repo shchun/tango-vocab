@@ -1,14 +1,14 @@
-// Tango Vocab — 파일 기반 설정 (정적 페이지에서 실제로 동작)
+// Tango Vocab — 파일 기반 설정 (선택)
+//
+// index.html에 기본 Apps Script URL이 내장돼 있어서 보통 이 파일은 필요 없습니다.
+// 다른 시트(다른 Apps Script 배포)를 연결할 때만 사용하세요.
 //
 // 사용법:
 //   1) 이 파일을 config.js 로 복사  ->  cp config.js.example config.js
-//   2) 아래 값을 실제 값으로 채우기
+//   2) gasUrl 을 채우기
 //   3) config.js 는 .gitignore 처리되어 깃에 올라가지 않음
 //
-// index.html 이 이 전역 객체를 읽어서, ⚙️ 모달에 매번 입력하지 않아도 됩니다.
+// 읽기·쓰기 모두 Apps Script 하나로 처리합니다. 브라우저에 API 키는 없습니다.
 window.TANGO_CONFIG = {
-  sheetId:   "18bTX1J7iCzB9r-H4YBg4su3lUCUAr4JvcL2FV_Xwa3M",
-  apiKey:    "AIzaSy...",          // Google Sheets API Key
-  sheetName: "vocab",
-  gasUrl:    "",                    // Apps Script 웹앱 URL (3단계에서 채움)
+  gasUrl: "https://script.google.com/macros/s/.../exec",
 };
