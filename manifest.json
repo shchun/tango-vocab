@@ -4,8 +4,8 @@
   "description": "Japanese vocabulary with Slack input",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f0e17",
-  "theme_color": "#0f0e17",
+  "background_color": "#f7f6f3",
+  "theme_color": "#f7f6f3",
   "orientation": "portrait-primary",
   "icons": [
     {

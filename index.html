@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f0e17">
+<meta name="theme-color" content="#f7f6f3">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Tango">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -25,15 +25,15 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap');
 
   :root {
-    --bg:       #0f0e17;
-    --surface:  #1a1928;
-    --card:     #22213a;
-    --card-ho:  #2a2848;
+    --bg:       #f7f6f3;
+    --surface:  #ffffff;
+    --card:     #ffffff;
+    --card-ho:  #f1efea;
     --accent:   #e8645a;
-    --gold:     #f0c040;
-    --text:     #ece8e1;
-    --muted:    rgba(236,232,225,0.42);
-    --border:   rgba(255,255,255,0.08);
+    --gold:     #c8920a;
+    --text:     #2b2833;
+    --muted:    rgba(43,40,51,0.5);
+    --border:   rgba(0,0,0,0.10);
     --radius:   14px;
   }
 
@@ -90,7 +90,7 @@
     border-radius: 999px; color: var(--text); font-size: 13px;
     outline: none; transition: border-color .15s;
   }
-  .search-wrap input:focus { border-color: rgba(255,255,255,0.25); }
+  .search-wrap input:focus { border-color: rgba(0,0,0,0.22); }
   .search-wrap::before {
     content: '🔍'; position: absolute; left: 12px; top: 50%;
     transform: translateY(-50%); font-size: 13px; pointer-events: none;
@@ -143,7 +143,7 @@
     letter-spacing: .06em; min-height: 14px;
   }
   .card-meaning {
-    font-size: 14px; color: rgba(236,232,225,0.82); margin-top: 2px;
+    font-size: 14px; color: rgba(43,40,51,0.80); margin-top: 2px;
     line-height: 1.4;
   }
   .card-meta {
@@ -163,7 +163,7 @@
     position: absolute; top: 12px; right: 14px;
     font-size: 9px; font-weight: 700; letter-spacing: .08em;
     padding: 2px 7px; border-radius: 999px;
-    background: rgba(255,255,255,0.07); color: var(--muted);
+    background: rgba(0,0,0,0.06); color: var(--muted);
   }
 
   /* ── empty state ── */
@@ -198,9 +198,9 @@
     font-size: 10px; padding: 2px 8px; border-radius: 999px; font-weight: 700;
     letter-spacing: .06em;
   }
-  .badge-add    { background: rgba(100,200,100,0.15); color: #80e080; }
+  .badge-add    { background: rgba(46,158,79,0.14); color: #2e9e4f; }
   .badge-star   { background: rgba(240,192,64,0.15);  color: var(--gold); }
-  .badge-unstar { background: rgba(255,255,255,0.07); color: var(--muted); }
+  .badge-unstar { background: rgba(0,0,0,0.06); color: var(--muted); }
 
   /* ── pill button (공통) ── */
   .pill {
@@ -233,16 +233,16 @@
   .setup-banner .inner {
     background: rgba(232,100,90,0.10); border: 1px solid rgba(232,100,90,0.30);
     border-radius: var(--radius); padding: 16px 20px;
-    font-size: 13px; line-height: 1.7; color: rgba(236,232,225,0.75);
+    font-size: 13px; line-height: 1.7; color: rgba(43,40,51,0.72);
   }
   .setup-banner code {
-    background: rgba(255,255,255,0.08); border-radius: 4px;
+    background: rgba(0,0,0,0.06); border-radius: 4px;
     padding: 1px 6px; font-family: monospace; color: var(--accent);
   }
 
   /* ── config modal ── */
   .modal-bg {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
     backdrop-filter: blur(6px); z-index: 500;
     display: flex; align-items: center; justify-content: center;
     opacity: 0; pointer-events: none; transition: opacity .2s;
@@ -263,8 +263,42 @@
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 8px; color: var(--text); font-size: 13px; outline: none;
   }
-  .field input:focus { border-color: rgba(255,255,255,0.25); }
+  .field input:focus { border-color: rgba(0,0,0,0.22); }
   .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── 외우기(flashcard) 모드 ── */
+  .study { max-width: 560px; margin: 18px auto 0; padding: 0 24px; }
+  .study-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .study-bar .count { margin-left: auto; font-size: 13px; color: var(--muted); }
+  .study-bar .count strong { color: var(--text); font-weight: 700; }
+  .flashcard { position: relative; width: 100%; min-height: 320px; perspective: 1400px; cursor: pointer; user-select: none; }
+  .flashcard-inner { position: relative; width: 100%; min-height: 320px; transition: transform .5s; transform-style: preserve-3d; }
+  .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 32px; text-align: center;
+  }
+  .face.back { transform: rotateY(180deg); background: var(--card-ho); }
+  .fc-word { font-family: 'Noto Sans JP', sans-serif; font-size: 48px; font-weight: 700; line-height: 1.15; }
+  .fc-reading { font-family: 'Noto Sans JP', sans-serif; font-size: 18px; color: var(--muted); letter-spacing: .06em; }
+  .fc-meaning { font-size: 30px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .fc-level { position: absolute; top: 16px; right: 18px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: rgba(0,0,0,0.06); color: var(--muted); }
+  .fc-star { position: absolute; top: 12px; left: 14px; background: none; border: none; cursor: pointer; font-size: 22px; line-height: 1; opacity: .45; transition: opacity .15s, transform .15s; }
+  .fc-star:hover { opacity: 1; transform: scale(1.15); }
+  .fc-star.on { opacity: 1; }
+  .fc-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .study-nav { display: flex; gap: 10px; margin-top: 18px; }
+  .nav-btn {
+    flex: 1; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    cursor: pointer; transition: background .15s;
+  }
+  .nav-btn:hover { background: var(--card-ho); }
+  .nav-btn:disabled { opacity: .35; cursor: default; }
+  .nav-btn.flip { background: var(--accent); border-color: var(--accent); color: #fff; flex: 1.3; }
+  .study-done { text-align: center; color: var(--muted); padding: 60px 24px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -307,6 +341,7 @@
 <!-- Tabs -->
 <div class="tabs">
   <button class="tab active" onclick="switchTab('cards')" id="tab-cards">카드</button>
+  <button class="tab" onclick="switchTab('study')" id="tab-study">🎴 외우기</button>
   <button class="tab" onclick="switchTab('history')" id="tab-history">히스토리</button>
 </div>
 
@@ -330,6 +365,37 @@
 
 <!-- History -->
 <div class="history-list" id="historyList" style="display:none"></div>
+
+<!-- 외우기 (flashcard) -->
+<div class="study" id="studyView" style="display:none">
+  <div class="study-bar">
+    <button class="filter-btn" id="studyStarFilter" onclick="toggleStudyStar()">⭐ 중요만</button>
+    <button class="filter-btn" onclick="shuffleStudy()">🔀 섞기</button>
+    <span class="count"><strong id="studyPos">0</strong> / <span id="studyTotal">0</span></span>
+  </div>
+  <div class="flashcard" id="flashcard" onclick="flipCard()">
+    <div class="flashcard-inner">
+      <div class="face front">
+        <span class="fc-level" id="fcLevel"></span>
+        <button class="fc-star" id="fcStar" onclick="studyToggleStarBtn(event)">☆</button>
+        <div class="fc-word" id="fcWord"></div>
+        <div class="fc-reading" id="fcReading"></div>
+        <div class="fc-hint">탭하면 뜻 보기</div>
+      </div>
+      <div class="face back">
+        <div class="fc-reading" id="fcReadingBack"></div>
+        <div class="fc-meaning" id="fcMeaning"></div>
+        <div class="fc-hint">탭하면 단어로</div>
+      </div>
+    </div>
+  </div>
+  <div class="study-nav">
+    <button class="nav-btn" id="studyPrev" onclick="studyPrev()">← 이전</button>
+    <button class="nav-btn flip" onclick="flipCard()">뒤집기</button>
+    <button class="nav-btn" id="studyNext" onclick="studyNext()">다음 →</button>
+  </div>
+  <div class="study-done" id="studyEmpty" style="display:none">외울 단어가 없어요.</div>
+</div>
 
 <!-- Loading / Empty -->
 <div class="loading" id="loadingEl" style="display:none">
@@ -516,7 +582,11 @@ function switchTab(tab) {
   document.getElementById('toolbar-cards').style.display = tab === 'cards' ? '' : 'none';
   document.getElementById('cardsGrid').style.display      = tab === 'cards' ? '' : 'none';
   document.getElementById('historyList').style.display    = tab === 'history' ? '' : 'none';
+  document.getElementById('studyView').style.display      = tab === 'study' ? '' : 'none';
+  document.getElementById('stats-bar').style.display      = tab === 'cards' && words.length ? '' : 'none';
   document.getElementById('emptyEl').style.display        = 'none';
+
+  if (tab === 'study') buildStudy();
 }
 
 // ── STAR FILTER ──────────────────────────────────────────
@@ -525,6 +595,75 @@ function toggleStarFilter() {
   document.getElementById('starFilter').classList.toggle('active', showStarOnly);
   renderCards();
 }
+
+// ── 외우기(flashcard) 모드 ──────────────────────────────
+let studyOrder    = [];     // 학습 대상 word 객체 배열 (words의 참조)
+let studyIdx      = 0;
+let studyStarOnly = false;
+
+function buildStudy() {
+  studyOrder = studyStarOnly ? words.filter(w => w.starred) : words.slice();
+  studyIdx = 0;
+  renderStudy();
+}
+function renderStudy() {
+  const fc    = document.getElementById('flashcard');
+  const nav   = document.querySelector('.study-nav');
+  const empty = document.getElementById('studyEmpty');
+  const total = studyOrder.length;
+  document.getElementById('studyTotal').textContent = total;
+
+  if (!total) {
+    fc.style.display = nav.style.display = 'none';
+    empty.style.display = '';
+    document.getElementById('studyPos').textContent = '0';
+    return;
+  }
+  fc.style.display = ''; nav.style.display = ''; empty.style.display = 'none';
+  if (studyIdx >= total) studyIdx = total - 1;
+
+  const w = studyOrder[studyIdx];
+  fc.classList.remove('flipped');   // 새 카드는 항상 앞면(단어)부터
+  document.getElementById('fcWord').textContent        = w.word;
+  document.getElementById('fcReading').textContent     = w.reading || '';
+  document.getElementById('fcReadingBack').textContent = w.reading || '';
+  document.getElementById('fcMeaning').textContent     = w.meaning || '';
+  document.getElementById('fcLevel').textContent       = w.level || '';
+  const star = document.getElementById('fcStar');
+  star.textContent = w.starred ? '⭐' : '☆';
+  star.classList.toggle('on', !!w.starred);
+
+  document.getElementById('studyPos').textContent  = String(studyIdx + 1);
+  document.getElementById('studyPrev').disabled = studyIdx === 0;
+  document.getElementById('studyNext').disabled = studyIdx === total - 1;
+}
+function flipCard()  { document.getElementById('flashcard').classList.toggle('flipped'); }
+function studyNext() { if (studyIdx < studyOrder.length - 1) { studyIdx++; renderStudy(); } }
+function studyPrev() { if (studyIdx > 0) { studyIdx--; renderStudy(); } }
+function shuffleStudy() {
+  for (let i = studyOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [studyOrder[i], studyOrder[j]] = [studyOrder[j], studyOrder[i]];
+  }
+  studyIdx = 0;
+  renderStudy();
+}
+function toggleStudyStar() {
+  studyStarOnly = !studyStarOnly;
+  document.getElementById('studyStarFilter').classList.toggle('active', studyStarOnly);
+  buildStudy();
+}
+function studyToggleStarBtn(e) {
+  e.stopPropagation();                 // 카드 뒤집힘 방지
+  const w = studyOrder[studyIdx];
+  if (w) { toggleStar(w.id, e); renderStudy(); }   // 기존 토글 재사용(시트 저장)
+}
+document.addEventListener('keydown', e => {
+  if (currentTab !== 'study') return;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  else if (e.key === 'ArrowRight') studyNext();
+  else if (e.key === 'ArrowLeft')  studyPrev();
+});
 
 // ── INIT ─────────────────────────────────────────────────
 loadData();
