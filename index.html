@@ -165,6 +165,12 @@
     opacity: 0.3; transition: opacity .15s, transform .15s, color .15s;
   }
   .del-btn:hover { opacity: 1; transform: scale(1.2); }
+  .spk-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; line-height: 1; padding: 2px;
+    opacity: 0.4; transition: opacity .15s, transform .15s;
+  }
+  .spk-btn:hover { opacity: 1; transform: scale(1.2); }
 
   .card-level {
     position: absolute; top: 12px; right: 14px;
@@ -296,6 +302,12 @@
   .fc-star { position: absolute; top: 12px; left: 14px; background: none; border: none; cursor: pointer; font-size: 22px; line-height: 1; opacity: .45; transition: opacity .15s, transform .15s; }
   .fc-star:hover { opacity: 1; transform: scale(1.15); }
   .fc-star.on { opacity: 1; }
+  .fc-spk {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    cursor: pointer; font-size: 20px; line-height: 1; padding: 8px 16px;
+    transition: background .15s, transform .15s;
+  }
+  .fc-spk:hover { background: var(--card-ho); transform: scale(1.05); }
   .fc-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .study-nav { display: flex; gap: 10px; margin-top: 18px; }
   .nav-btn {
@@ -380,6 +392,7 @@
   <div class="study-bar">
     <button class="filter-btn" id="studyStarFilter" onclick="toggleStudyStar()">⭐ 중요만</button>
     <button class="filter-btn" onclick="shuffleStudy()">🔀 섞기</button>
+    <button class="filter-btn" id="autoSpeakBtn" onclick="toggleAutoSpeak()">🔊 자동 읽기</button>
     <span class="count"><strong id="studyPos">0</strong> / <span id="studyTotal">0</span></span>
   </div>
   <div class="flashcard" id="flashcard" onclick="flipCard()">
@@ -389,6 +402,7 @@
         <button class="fc-star" id="fcStar" onclick="studyToggleStarBtn(event)">☆</button>
         <div class="fc-word" id="fcWord"></div>
         <div class="fc-reading" id="fcReading"></div>
+        <button class="fc-spk" onclick="speakStudy(event)" title="읽기">🔊</button>
         <div class="fc-hint">탭하면 뜻 보기</div>
       </div>
       <div class="face back">
@@ -533,6 +547,7 @@ function renderCards() {
       <div class="card-meta">
         <span class="card-date">${dateStr}</span>
         <span class="card-actions">
+          <button class="spk-btn" onclick="speakWord(${w.id}, event)" title="읽기">🔊</button>
           <button class="del-btn" onclick="deleteWord(${w.id}, event)" title="삭제">🗑</button>
           <button class="star-btn" onclick="toggleStar(${w.id}, event)" title="중요 마킹">
             ${w.starred ? '⭐' : '☆'}
@@ -670,10 +685,40 @@ function toggleStarFilter() {
   renderCards();
 }
 
+// ── 발음 읽기 (Web Speech API, 브라우저 내장 일본어 음성) ──
+function speak(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = 0.9;
+    const ja = speechSynthesis.getVoices().find(v => (v.lang || '').toLowerCase().startsWith('ja'));
+    if (ja) u.voice = ja;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function speakWord(id, e) {                 // 카드의 🔊
+  e.stopPropagation();
+  const w = words[id];
+  if (w) speak(w.reading || w.word);
+}
+function speakStudy(e) {                     // 외우기 카드의 🔊
+  e.stopPropagation();                       // 카드 뒤집힘 방지
+  const w = studyOrder[studyIdx];
+  if (w) speak(w.reading || w.word);
+}
+function toggleAutoSpeak() {
+  autoSpeak = !autoSpeak;
+  document.getElementById('autoSpeakBtn').classList.toggle('active', autoSpeak);
+  if (autoSpeak) { const w = studyOrder[studyIdx]; if (w) speak(w.reading || w.word); }
+}
+
 // ── 외우기(flashcard) 모드 ──────────────────────────────
 let studyOrder    = [];     // 학습 대상 word 객체 배열 (words의 참조)
 let studyIdx      = 0;
 let studyStarOnly = false;
+let autoSpeak     = false;  // 외우기 카드 넘길 때 자동 발음
 
 function buildStudy() {
   studyOrder = studyStarOnly ? words.filter(w => w.starred) : words.slice();
@@ -710,6 +755,8 @@ function renderStudy() {
   document.getElementById('studyPos').textContent  = String(studyIdx + 1);
   document.getElementById('studyPrev').disabled = studyIdx === 0;
   document.getElementById('studyNext').disabled = studyIdx === total - 1;
+
+  if (autoSpeak) speak(w.reading || w.word);   // 자동 읽기 켜져 있으면 발음
 }
 function flipCard()  { document.getElementById('flashcard').classList.toggle('flipped'); }
 function studyNext() { if (studyIdx < studyOrder.length - 1) { studyIdx++; renderStudy(); } }
