@@ -158,6 +158,13 @@
   }
   .star-btn:hover { opacity: 1; transform: scale(1.2); }
   .card.starred .star-btn { opacity: 1; }
+  .card-actions { display: flex; align-items: center; gap: 2px; }
+  .del-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; line-height: 1; padding: 2px;
+    opacity: 0.3; transition: opacity .15s, transform .15s, color .15s;
+  }
+  .del-btn:hover { opacity: 1; transform: scale(1.2); }
 
   .card-level {
     position: absolute; top: 12px; right: 14px;
@@ -201,6 +208,7 @@
   .badge-add    { background: rgba(46,158,79,0.14); color: #2e9e4f; }
   .badge-star   { background: rgba(240,192,64,0.15);  color: var(--gold); }
   .badge-unstar { background: rgba(0,0,0,0.06); color: var(--muted); }
+  .badge-del    { background: rgba(232,100,90,0.14); color: var(--accent); }
 
   /* ── pill button (공통) ── */
   .pill {
@@ -351,6 +359,7 @@
     <input type="text" id="searchInput" placeholder="단어 검색..." oninput="renderCards()">
   </div>
   <button class="filter-btn" id="starFilter" onclick="toggleStarFilter()">⭐ 중요만 보기</button>
+  <button class="filter-btn" id="addSamplesBtn" onclick="addSamples()">➕ 예시 5개</button>
 </div>
 
 <!-- Stats -->
@@ -523,9 +532,12 @@ function renderCards() {
       <div class="card-meaning">${w.meaning}</div>
       <div class="card-meta">
         <span class="card-date">${dateStr}</span>
-        <button class="star-btn" onclick="toggleStar(${w.id}, event)" title="중요 마킹">
-          ${w.starred ? '⭐' : '☆'}
-        </button>
+        <span class="card-actions">
+          <button class="del-btn" onclick="deleteWord(${w.id}, event)" title="삭제">🗑</button>
+          <button class="star-btn" onclick="toggleStar(${w.id}, event)" title="중요 마킹">
+            ${w.starred ? '⭐' : '☆'}
+          </button>
+        </span>
       </div>`;
     grid.appendChild(card);
   });
@@ -541,8 +553,8 @@ function renderHistory() {
   history.slice(0, 100).forEach(h => {
     const item = document.createElement('div');
     item.className = 'history-item';
-    const badgeClass = h.action === 'add' ? 'badge-add' : h.action === 'star' ? 'badge-star' : 'badge-unstar';
-    const badgeText  = h.action === 'add' ? '추가' : h.action === 'star' ? '⭐ 중요' : '☆ 해제';
+    const badgeClass = { add:'badge-add', star:'badge-star', unstar:'badge-unstar', delete:'badge-del' }[h.action] || 'badge-unstar';
+    const badgeText  = { add:'추가', star:'⭐ 중요', unstar:'☆ 해제', delete:'🗑 삭제' }[h.action] || h.action;
     const timeStr = h.at ? new Date(h.at).toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
     item.innerHTML = `
       <div>
@@ -571,6 +583,68 @@ async function toggleStar(id, e) {
   }
 
   renderAll();
+}
+
+// ── DELETE ───────────────────────────────────────────────
+async function deleteWord(id, e) {
+  e.stopPropagation();
+  const w = words[id];
+  if (!w) return;
+  if (!confirm(`"${w.word}" 단어를 삭제할까요?`)) return;
+  try {
+    await fetch(gasUrl() + '?action=delete&word=' + encodeURIComponent(w.word));
+  } catch (err) {}
+  loadData();   // 시트 기준으로 다시 읽어 id 재정렬
+}
+
+// ── 예시 단어 5개 추가 ────────────────────────────────────
+const SAMPLE_POOL = [
+  { word:'水',     reading:'みず',       meaning:'물',          level:'N5' },
+  { word:'学校',   reading:'がっこう',   meaning:'학교',        level:'N5' },
+  { word:'時間',   reading:'じかん',     meaning:'시간',        level:'N5' },
+  { word:'友達',   reading:'ともだち',   meaning:'친구',        level:'N5' },
+  { word:'天気',   reading:'てんき',     meaning:'날씨',        level:'N5' },
+  { word:'飲む',   reading:'のむ',       meaning:'마시다',      level:'N5' },
+  { word:'見る',   reading:'みる',       meaning:'보다',        level:'N5' },
+  { word:'行く',   reading:'いく',       meaning:'가다',        level:'N5' },
+  { word:'買う',   reading:'かう',       meaning:'사다',        level:'N5' },
+  { word:'大きい', reading:'おおきい',   meaning:'크다',        level:'N5' },
+  { word:'高い',   reading:'たかい',     meaning:'높다/비싸다', level:'N5' },
+  { word:'新しい', reading:'あたらしい', meaning:'새롭다',      level:'N5' },
+  { word:'元気',   reading:'げんき',     meaning:'건강함/활기', level:'N5' },
+  { word:'有名',   reading:'ゆうめい',   meaning:'유명함',      level:'N5' },
+  { word:'いつも', reading:'',           meaning:'항상',        level:'N5' },
+  { word:'ゆっくり', reading:'',         meaning:'천천히',      level:'N5' },
+  { word:'旅行',   reading:'りょこう',   meaning:'여행',        level:'N4' },
+  { word:'約束',   reading:'やくそく',   meaning:'약속',        level:'N4' },
+  { word:'練習',   reading:'れんしゅう', meaning:'연습',        level:'N4' },
+  { word:'説明',   reading:'せつめい',   meaning:'설명',        level:'N4' },
+];
+async function addSamples() {
+  const btn = document.getElementById('addSamplesBtn');
+  const have = new Set(words.map(w => w.word));
+  const pool = SAMPLE_POOL.filter(w => !have.has(w.word));
+  for (let i = pool.length - 1; i > 0; i--) {           // 셔플
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const pick = pool.slice(0, 5);
+  if (!pick.length) { alert('추가할 새 예시가 없어요 (이미 다 있어요).'); return; }
+
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = '추가 중…';
+  for (const w of pick) {
+    const qs = '?action=add'
+      + '&word='    + encodeURIComponent(w.word)
+      + '&reading=' + encodeURIComponent(w.reading)
+      + '&meaning=' + encodeURIComponent(w.meaning)
+      + '&level='   + encodeURIComponent(w.level);
+    try { await fetch(gasUrl() + qs); } catch (err) {}
+  }
+  btn.disabled = false;
+  btn.textContent = orig;
+  loadData();
 }
 
 // ── TABS ─────────────────────────────────────────────────
